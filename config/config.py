@@ -12,7 +12,7 @@ def is_enabled(value, default):
 API_ID = int(os.environ.get("API_ID", "14688437"))
 API_HASH = os.environ.get("API_HASH", "5310285db722d1dceb128b88772d53a6")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "6399781777:AAHQl6dNdsUKCeJYPqvCbDdhS6pp-qMDuj0")
-FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "-1002060524705"))
+FORCE_SUB_CHANNEL = int(os.environ.get("FORCE_SUB_CHANNEL", "1002060524705"))
 SUPPORT = os.environ.get("SUPPORT", "blackcatnetwork")
 UPDATES = os.environ.get("UPDATES", "blackcatserver")
 BOT_NAME = os.environ.get("BOT_NAME", "Pvs")
