@@ -25,17 +25,11 @@ async def start_command(_, message):
             "To use this bot, you must subscribe to our channel.",
             reply_markup=keyboard
         )
-        return
-    if is_subscribed.status in ["member", "administrator", "creator"]:
-        await message.reply_photo(
-            photo=random.choice(PHOTOS),
-            caption=f"🎬 **Welcome to the {BOT_NAME} Movies Download Bot!** 🎥\n\n🤖 This bot allows you to download and watch your favorite movies right here on Telegram.\n\n📌 **Note:**This bot is for educational and entertainment purposes only.\nMake sure to follow the channel for the latest updates and movie recommendations.\n\n🙏 Thank you for choosing {BOT_NAME} Movies Download Bot! Enjoy your movie experience!🍿", 
-            reply_markup=start_keyboard
-        )
-    else:
-        # Handle the case where the user is not a member, administrator, or creator.
-        keyboard = Markup([[Button("📢 Join Channel", url=f"https://t.me/{FORCE_SUB_CHANNEL}")]])
-        await message.reply_text(
-            "To use this bot, you must subscribe to our channel.",
-            reply_markup=keyboard
-        )
+        return   
+    await message.reply_photo(
+        photo=random.choice(PHOTOS),
+        caption=f"🎬 **Welcome to the {BOT_NAME} Movies Download Bot!** 🎥\n\n🤖 This bot allows you to download and watch your favorite movies right here on Telegram.\n\n📌 **Note:**This bot is for educational and entertainment purposes only.\nMake sure to follow the channel for the latest updates and movie recommendations.\n\n🙏 Thank you for choosing {BOT_NAME} Movies Download Bot! Enjoy your movie experience!🍿", 
+        reply_markup=start_keyboard
+    )
+
+  
