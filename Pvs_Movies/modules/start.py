@@ -5,6 +5,7 @@ from Pvs_Movies import app
 #from Pvs_Movies.database.chats_db import save_users, save_chats, get_users, get_chats
 from config.config import FORCE_SUB_CHANNEL, SUPPORT, UPDATES, PHOTOS, BOT_NAME, BOT_USERNAME
 import asyncio
+from pyrogram.errors import UserNotParticipant
 
 start_keyboard = Markup([
     [Button("Help & Commands", callback_data="help")],
@@ -16,7 +17,15 @@ start_keyboard = Markup([
 async def start_command(_, message):
     user_id = message.from_user.id
     chat_id = message.chat.id
-    is_subscribed = await app.get_chat_member(FORCE_SUB_CHANNEL, user_id)  
+    try:
+        is_subscribed = await app.get_chat_member(FORCE_SUB_CHANNEL, user_id)
+    except UserNotParticipant:
+        keyboard = Markup([[Button("📢 Join Channel", url=f"https://t.me/{FORCE_SUB_CHANNEL}")]])
+        await message.reply_text(
+            "To use this bot, you must subscribe to our channel.",
+            reply_markup=keyboard
+        )
+        return
     if is_subscribed.status in ["member", "administrator", "creator"]:
         await message.reply_photo(
             photo=random.choice(PHOTOS),
@@ -24,6 +33,7 @@ async def start_command(_, message):
             reply_markup=start_keyboard
         )
     else:
+        # Handle the case where the user is not a member, administrator, or creator.
         keyboard = Markup([[Button("📢 Join Channel", url=f"https://t.me/{FORCE_SUB_CHANNEL}")]])
         await message.reply_text(
             "To use this bot, you must subscribe to our channel.",
