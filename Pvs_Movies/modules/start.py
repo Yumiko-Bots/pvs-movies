@@ -3,9 +3,36 @@ from pyrogram.types import InlineKeyboardButton as Button, InlineKeyboardMarkup 
 import random
 from Pvs_Movies import app
 #from Pvs_Movies.database.chats_db import save_users, save_chats, get_users, get_chats
-from config.config import FORCE_SUB_CHANNEL, SUPPORT, UPDATES, PHOTOS, BOT_NAME, BOT_USERNAME
+from config.config import FORCE_SUB_CHANNEL, SUPPORT, UPDATES, PHOTOS, BOT_NAME, BOT_USERNAME, OWNERS, BAN_COMMANDS, MOVIE_DL_COMMANDS, MOVIE_FIND_COMMANDS, FILTERS_COMMANDS, CONNECT_COMMANDS, PURGE_COMMANDS, MUTE_COMMANDS, FILE_STORE_COMMANDS
 import asyncio
 from pyrogram.errors import UserNotParticipant
+
+COMMANDS_MAPPING = {
+    "Owners": OWNERS,
+    "Ban": BAN_COMMANDS,
+    "Movie Download": MOVIE_DL_COMMANDS,
+    "Movie Find": MOVIE_FIND_COMMANDS,
+    "Filters": FILTERS_COMMANDS,
+    "Connect": CONNECT_COMMANDS,
+    "Purge": PURGE_COMMANDS,
+    "Mute": MUTE_COMMANDS,
+    "File Store": FILE_STORE_COMMANDS,
+}
+HELP_TEXT_MAPPING = {
+    "Owners": "Commands for Owners:\n" + "\n".join(OWNERS),
+    "Ban": "Commands for Ban:\n" + "\n".join(BAN_COMMANDS),
+    "Movie Download": "Commands for Movie Download:\n" + "\n".join(MOVIE_DL_COMMANDS),
+    "Movie Find": "Commands for Movie Find:\n" + "\n".join(MOVIE_FIND_COMMANDS),
+    "Filters": "Commands for Filters:\n" + "\n".join(FILTERS_COMMANDS),
+    "Connect": "Commands for Connect:\n" + "\n".join(CONNECT_COMMANDS),
+    "Purge": "Commands for Purge:\n" + "\n".join(PURGE_COMMANDS),
+    "Mute": "Commands for Mute:\n" + "\n".join(MUTE_COMMANDS),
+    "File Store": "Commands for File Store:\n" + "\n".join(FILE_STORE_COMMANDS),
+}
+
+help_keyboard = Markup([
+    [Button(section, callback_data=f"help_{section}")] for section in COMMANDS_MAPPING
+])
 
 start_keyboard = Markup([
     [Button("Help & Commands", callback_data="help")],
@@ -32,4 +59,24 @@ async def start_command(_, message):
         reply_markup=start_keyboard
     )
 
-  
+@app.on_callback_query(filters.regex(r"help"))
+async def help_callback(_, query):
+    await query.message.edit_text(
+        text="Choose a section:",
+        reply_markup=help_keyboard
+    )
+
+@app.on_callback_query(filters.regex(r"help_(.*)"))
+async def help_section_callback(_, query):
+    section = query.matches[0].group(1)
+    if section in COMMANDS_MAPPING:
+        text = HELP_TEXT_MAPPING[section]
+        await query.message.edit_text(
+            text=text,
+            reply_markup=Markup([[Button("Back", callback_data="help")]])
+        )
+    else:
+        await query.message.edit_text(
+            text="Invalid help section",
+            reply_markup=help_keyboard
+        )
