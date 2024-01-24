@@ -85,7 +85,7 @@ async def edit_message_with_check(chat_id, message_id, text, reply_markup):
 async def help_callback(_, query):
     await edit_message_with_check(
         query.message.chat.id,
-        query.message.message_id,
+        query.message.id,
         text="Choose a section:",
         reply_markup=help_keyboard
     )
@@ -97,14 +97,14 @@ async def help_section_callback(_, query):
         text = HELP_TEXT_MAPPING[section]
         await edit_message_with_check(
             query.message.chat.id,
-            query.message.message_id,
+            query.message.id,
             text=text,
             reply_markup=Markup([[Button("Back", callback_data="help")]])
         )
     else:
         await edit_message_with_check(
             query.message.chat.id,
-            query.message.message_id,
+            query.message.id,
             text="Invalid help section",
             reply_markup=help_keyboard
         )
