@@ -17,6 +17,7 @@ SUPPORT = os.environ.get("SUPPORT", "blackcatnetwork")
 UPDATES = os.environ.get("UPDATES", "blackcatserver")
 BOT_NAME = os.environ.get("BOT_NAME", "Pvs")
 BOT_USERNAME = os.environ.get("BOT_USERNAME", "ZaidRoobot")
+DATABASE_URL = os.environ.get('DATABASE_URL', "postgres://djgxscsb:BfWf5MS_b5YKumin5N4sHuUKbvO3sNJ8@salt.db.elephantsql.com/djgxscsb")
 PHOTOS = [
     "https://media.macphun.com/img/uploads/macphun/blog/625/visiting-site-photo-frame.jpg?q=75&w=1710&h=906&resize=cover",
     "https://img.freepik.com/free-photo/spectral-light-illuminates-transparent-red-colored-red-roses-abstract-flower-art-generative-ai_157027-1729.jpg?w=826&t=st=1705682239~exp=1705682839~hmac=d5aa89d6d6104747af0f040a3defeec8ce34e51bc2cc248337e57ca5cdbb52e4",
