@@ -71,7 +71,7 @@ async def start_command(_, message):
         reply_markup=start_keyboard
     )
 
-async def edit_message_with_check(chat_id, message_id, text, reply_markup):
+async def edit_message_with_check(chat_id, query, text, reply_markup):
     try:
         current_text = query.message.text if query.message.text else ""
         current_markup = query.message.reply_markup if query.message.reply_markup else None
