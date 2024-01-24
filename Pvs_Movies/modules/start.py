@@ -1,9 +1,21 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton as Button, InlineKeyboardMarkup as Markup
+from pyrogram.types import InlineKeyboardButton as Button, InlineKeyboardMarkup as Markup, Message, CallbackQuery
 import random
 from Pvs_Movies import app
-#from Pvs_Movies.database.chats_db import save_users, save_chats, get_users, get_chats
-from config.config import FORCE_SUB_CHANNEL, SUPPORT, UPDATES, PHOTOS, BOT_NAME, BOT_USERNAME, OWNERS, BAN_COMMANDS, MOVIE_DL_COMMANDS, MOVIE_FIND_COMMANDS, FILTERS_COMMANDS, CONNECT_COMMANDS, PURGE_COMMANDS, MUTE_COMMANDS, FILE_STORE_COMMANDS
+#from Pvs_Movies.database.chats_db import(
+       save_users, save_chats, 
+       get_users, get_chats
+)
+from config.config import(
+       FORCE_SUB_CHANNEL, SUPPORT, 
+       UPDATES, PHOTOS, 
+       BOT_NAME, BOT_USERNAME, 
+       OWNERS, BAN_COMMANDS,
+       MOVIE_DL_COMMANDS, MOVIE_FIND_COMMANDS,
+       FILTERS_COMMANDS, CONNECT_COMMANDS, 
+       PURGE_COMMANDS, MUTE_COMMANDS, 
+       FILE_STORE_COMMANDS
+)
 import asyncio
 from pyrogram.errors import UserNotParticipant
 
@@ -59,9 +71,21 @@ async def start_command(_, message):
         reply_markup=start_keyboard
     )
 
+async def edit_message_with_check(chat_id, message_id, text, reply_markup):
+    try:
+        current_text = query.message.text if query.message.text else ""
+        current_markup = query.message.reply_markup if query.message.reply_markup else None
+
+        if current_text != text or current_markup != reply_markup:
+            await query.message.edit_text(text=text, reply_markup=reply_markup)
+    except Exception as e:
+        print(f"Error editing message: {e}")
+        
 @app.on_callback_query(filters.regex(r"help"))
 async def help_callback(_, query):
-    await query.message.edit_text(
+    await edit_message_with_check(
+        query.message.chat.id,
+        query.message.message_id,
         text="Choose a section:",
         reply_markup=help_keyboard
     )
@@ -71,12 +95,16 @@ async def help_section_callback(_, query):
     section = query.matches[0].group(1)
     if section in COMMANDS_MAPPING:
         text = HELP_TEXT_MAPPING[section]
-        await query.message.edit_text(
+        await edit_message_with_check(
+            query.message.chat.id,
+            query.message.message_id,
             text=text,
             reply_markup=Markup([[Button("Back", callback_data="help")]])
         )
     else:
-        await query.message.edit_text(
+        await edit_message_with_check(
+            query.message.chat.id,
+            query.message.message_id,
             text="Invalid help section",
             reply_markup=help_keyboard
         )
