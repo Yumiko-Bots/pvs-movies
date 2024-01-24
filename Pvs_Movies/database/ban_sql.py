@@ -1,7 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardButton as Button, InlineKeyboardMarkup as Markup
 import psycopg2
-from Pvs_Movies.database import cursor
+from Pvs_Movies.database import cursor, conn
 
 create_table_query = """
 CREATE TABLE IF NOT EXISTS banned_users (
