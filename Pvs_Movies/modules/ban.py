@@ -1,19 +1,27 @@
 from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton as Button, InlineKeyboardMarkup as Markup
+from pyrogram.types import (
+    InlineKeyboardButton as Button,
+    InlineKeyboardMarkup as Markup,
+)
 from Pvs_Movies.database.ban_sql import ban_user, unban_user
 from Pvs_Movies import app
 
 @app.on_message(filters.command("ban") & filters.group)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
-    a = await app.get_chat_member(message.chat.id, user_id)
-    if not a.restrict_chat_member:
+    perms = []
+    member = (await app.get_chat_member(message.chat.id, user_id)).privileges
+    if not member:
+        return []
+    if member.can_restrict_members:
+        perms.append("can_restrict_members")
+    else:
         await message.reply_text("I don't have the necessary rights to ban users in this group.")
         return
     if not user_id:
         await message.reply_text("Please provide a user ID or username or reply to a user to ban.")
         return
-    if not (await app.get_chat_member(message.chat.id, message.from_user.id)).status in ("administrator", "creator"):
+    if (await app.get_chat_member(message.chat.id, message.from_user.id)).status not in ("administrator", "creator"):
         await message.reply_text("You must be an admin or the group owner to use this command.")
         return
 
@@ -32,16 +40,22 @@ async def ban_command(_, message):
 @app.on_message(filters.command("unban") & filters.group)
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
-    a = await app.get_chat_member(message.chat.id, user_id)
-    if not a.restrict_chat_member:
-        await message.reply_text("I don't have the necessary rights to ban users in this group.")
+    perms = []
+    member = (await app.get_chat_member(message.chat.id, user_id)).privileges
+    if not member:
+        return []
+    if member.can_restrict_members:
+        perms.append("can_restrict_members")
+    else:
+        await message.reply_text("I don't have the necessary rights to unban users in this group.")
         return
     if not user_id:
         await message.reply_text("Please provide a user ID, username, or reply to a user to unban.")
         return
-    if not (await app.get_chat_member(message.chat.id, message.from_user.id)).status in ("administrator", "creator"):
+    if (await app.get_chat_member(message.chat.id, message.from_user.id)).status not in ("administrator", "creator"):
         await message.reply_text("You must be an admin or the group owner to use this command.")
         return
+
     unban_user(user_id)
     await app.unban_chat_member(message.chat.id, user_id)
     await message.reply_text(
@@ -83,7 +97,7 @@ def get_ban_keyboard(user_id, username):
 async def unban_callback(_, query):
     user_id = int(query.matches[0].group(1))
     username = query.matches[0].group(2)
-    if not (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status in ("administrator", "creator"):
+    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "creator"):
         await query.answer("You're not an admin, you don't have the right to unban.", show_alert=True)
         return
     unban_user(user_id)
@@ -96,7 +110,7 @@ async def unban_callback(_, query):
 async def ban_callback(_, query):
     user_id = int(query.matches[0].group(1))
     username = query.matches[0].group(2)
-    if not (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status in ("administrator", "creator"):
+    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "creator"):
         await query.answer("You're not an admin, you don't have the right to ban.", show_alert=True)
         return
     ban_user(user_id, username, "")
