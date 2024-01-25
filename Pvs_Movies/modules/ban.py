@@ -7,7 +7,7 @@ from Pvs_Movies import app
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
     a = await app.get_chat_member(message.chat.id, user_id)
-    if not a.can_restrict_member:
+    if not a.restrict_chat_member:
         await message.reply_text("I don't have the necessary rights to ban users in this group.")
         return
     if not user_id:
@@ -33,7 +33,7 @@ async def ban_command(_, message):
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
     a = await app.get_chat_member(message.chat.id, user_id)
-    if not a.can_restrict_member:
+    if not a.restrict_chat_member:
         await message.reply_text("I don't have the necessary rights to ban users in this group.")
         return
     if not user_id:
