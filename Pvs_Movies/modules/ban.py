@@ -8,16 +8,6 @@ from Pvs_Movies import app
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
 
-from pyrogram import Client, filters
-from pyrogram.types import (
-    InlineKeyboardButton as Button,
-    InlineKeyboardMarkup as Markup,
-)
-from Pvs_Movies.database.ban_sql import ban_user, unban_user
-from Pvs_Movies import app
-from pyrogram.types import Message
-from pyrogram.enums import ChatType, ChatMemberStatus
-
 def admin_check(client, message: Message) -> bool:
     if not message.from_user:
         return False
@@ -30,7 +20,12 @@ def admin_check(client, message: Message) -> bool:
         return True
     chat_id = message.chat.id
     user_id = message.from_user.id
-    check_status = client.get_chat_member(chat_id=chat_id, user_id=user_id)
+    try:
+        check_status = await client.get_chat_member(chat_id=chat_id, user_id=user_id)
+    except Exception as e:
+        print(f"Error getting chat member: {e}")
+        return False
+
     if check_status.status not in [
         ChatMemberStatus.OWNER,
         ChatMemberStatus.ADMINISTRATOR
