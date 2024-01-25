@@ -44,6 +44,7 @@ async def admin_filter_f(_, client, message):
         not message.edit_date
         and await admin_check(client, message)
     )
+    
 admin_filter = filters.create(func=admin_filter_f, name="AdminFilter")
 
 @app.on_message(filters.command("ban") & filters.group & admin_fliter)
