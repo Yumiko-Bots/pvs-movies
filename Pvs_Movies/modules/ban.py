@@ -9,30 +9,28 @@ from Pvs_Movies import app
 @app.on_message(filters.command("ban") & filters.group)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
-    perms = []
-    member = (await app.get_chat_member(message.chat.id, user_id)).privileges
+    if user_id is None:
+        await message.reply_text("Please provide a valid user ID, username, or reply to a user to ban.")
+        return
+    try:
+        member = await app.get_chat_member(message.chat.id, user_id)
+    except Exception as e:
+        print(f"Error getting chat member: {e}")
+        await message.reply_text("Error retrieving chat member information.")
+        return
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    if not member:
-        return []
-    if member.can_restrict_members:
-        perms.append("can_restrict_members")
-    else:
+    if not member.privileges or not member.privileges.can_restrict_members:
         await message.reply_text("I don't have the necessary rights to ban users in this group.")
-        return
-    if not user_id:
-        await message.reply_text("Please provide a user ID or username or reply to a user to ban.")
         return
     if (await app.get_chat_member(message.chat.id, message.from_user.id)).status not in ("administrator", "creator"):
         await message.reply_text("You must be an admin or the group owner to use this command.")
         return
-
     app_id = await app.get_me().id
     if user_id == app_id:
         await message.reply_text("You cannot ban the bot owner.")
         return
-
     await app.ban_chat_member(message.chat.id, user_id)
     ban_user(user_id, username, reason)
     await message.reply_text(
@@ -43,25 +41,24 @@ async def ban_command(_, message):
 @app.on_message(filters.command("unban") & filters.group)
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
-    perms = []
-    member = (await app.get_chat_member(message.chat.id, user_id)).privileges
+    if user_id is None:
+        await message.reply_text("Please provide a valid user ID, username, or reply to a user to unban.")
+        return
+    try:
+        member = await app.get_chat_member(message.chat.id, user_id)
+    except Exception as e:
+        print(f"Error getting chat member: {e}")
+        await message.reply_text("Error retrieving chat member information.")
+        return
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    if not member:
-        return []
-    if member.can_restrict_members:
-        perms.append("can_restrict_members")
-    else:
+    if not member.privileges or not member.privileges.can_restrict_members:
         await message.reply_text("I don't have the necessary rights to unban users in this group.")
-        return
-    if not user_id:
-        await message.reply_text("Please provide a user ID, username, or reply to a user to unban.")
         return
     if (await app.get_chat_member(message.chat.id, message.from_user.id)).status not in ("administrator", "creator"):
         await message.reply_text("You must be an admin or the group owner to use this command.")
         return
-
     unban_user(user_id)
     await app.unban_chat_member(message.chat.id, user_id)
     await message.reply_text(
