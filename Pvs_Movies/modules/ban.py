@@ -21,7 +21,7 @@ def admin_check(client, message: Message) -> bool:
     chat_id = message.chat.id
     user_id = message.from_user.id
     try:
-        check_status = await client.get_chat_member(chat_id=chat_id, user_id=user_id)
+        check_status = client.get_chat_member(chat_id=chat_id, user_id=user_id)
     except Exception as e:
         print(f"Error getting chat member: {e}")
         return False
