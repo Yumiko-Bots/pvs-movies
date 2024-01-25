@@ -47,7 +47,7 @@ async def admin_filter_f(_, client, message):
     
 admin_filter = filters.create(func=admin_filter_f, name="AdminFilter")
 
-@app.on_message(filters.command("ban") & filters.group & admin_fliter)
+@app.on_message(filters.command("ban") & filters.group & admin_filterr)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
     if user_id is None:
@@ -76,7 +76,7 @@ async def ban_command(_, message):
         reply_markup=get_unban_keyboard(user_id, username)
     )
 
-@app.on_message(filters.command("unban") & filters.group & admin_fliter)
+@app.on_message(filters.command("unban") & filters.group & admin_filterr)
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
     if user_id is None:
