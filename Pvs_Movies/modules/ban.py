@@ -97,5 +97,3 @@ async def ban_callback(_, query):
         f"User {user_id} ({username}) has been banned.",
         reply_markup=get_unban_keyboard(user_id, username)
     )
-
-app.run()
