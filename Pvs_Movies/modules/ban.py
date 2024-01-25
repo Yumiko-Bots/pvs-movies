@@ -8,8 +8,7 @@ from Pvs_Movies import app
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
 
-
-async def admin_check(message: Message) -> bool:
+async def admin_check(_, message: Message) -> bool:
     if not message.from_user:
         return False
     if message.chat.type not in [ChatType.SUPERGROUP, ChatType.CHANNEL]:
@@ -30,6 +29,7 @@ async def admin_check(message: Message) -> bool:
         return False
     else:
         return True
+
 
 @app.on_message(filters.command("ban") & filters.group & admin_check)
 async def ban_command(_, message):
