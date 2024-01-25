@@ -8,7 +8,17 @@ from Pvs_Movies import app
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
 
-def admin_check(_, message: Message) -> bool:
+from pyrogram import Client, filters
+from pyrogram.types import (
+    InlineKeyboardButton as Button,
+    InlineKeyboardMarkup as Markup,
+)
+from Pvs_Movies.database.ban_sql import ban_user, unban_user
+from Pvs_Movies import app
+from pyrogram.types import Message
+from pyrogram.enums import ChatType, ChatMemberStatus
+
+def admin_check(client, message: Message) -> bool:
     if not message.from_user:
         return False
     if message.chat.type not in [ChatType.SUPERGROUP, ChatType.CHANNEL]:
@@ -18,7 +28,6 @@ def admin_check(_, message: Message) -> bool:
         1087968824,  # GroupAnonymousBot
     ]:
         return True
-    client = message._client
     chat_id = message.chat.id
     user_id = message.from_user.id
     check_status = client.get_chat_member(chat_id=chat_id, user_id=user_id)
@@ -30,13 +39,12 @@ def admin_check(_, message: Message) -> bool:
     else:
         return True
 
-async def admin_filter_f(filt, client, message):
+async def admin_filter_f(_, client, message):
     return (
-        # t, lt, fl 2013
         not message.edit_date
-        and await admin_check(message)
+        and await admin_check(client, message)
     )
-admin_fliter = filters.create(func=admin_filter_f, name="AdminFilter")
+admin_filter = filters.create(func=admin_filter_f, name="AdminFilter")
 
 @app.on_message(filters.command("ban") & filters.group & admin_fliter)
 async def ban_command(_, message):
