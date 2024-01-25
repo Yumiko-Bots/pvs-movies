@@ -8,7 +8,7 @@ from Pvs_Movies import app
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
 
-def admin_check(client, message: Message) -> bool:
+async def admin_check(client, message: Message) -> bool:
     if not message.from_user:
         return False
     if message.chat.type not in [ChatType.SUPERGROUP, ChatType.CHANNEL]:
@@ -21,7 +21,7 @@ def admin_check(client, message: Message) -> bool:
     chat_id = message.chat.id
     user_id = message.from_user.id
     try:
-        check_status = client.get_chat_member(chat_id=chat_id, user_id=user_id)
+        check_status = await client.get_chat_member(chat_id=chat_id, user_id=user_id)
     except Exception as e:
         print(f"Error getting chat member: {e}")
         return False
