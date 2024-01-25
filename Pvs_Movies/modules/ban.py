@@ -46,7 +46,7 @@ async def ban_command(_, message):
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]:
+    if member.status not in ["administrator", "owner"]:
         await message.reply_text("You don't have the necessary rights to ban users in this group.")
         return
     app_id = await app.get_me().id
@@ -75,7 +75,7 @@ async def unban_command(_, message):
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    if member.status not in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]:
+    if member.status not in ["administrator", "owner"]:
         await message.reply_text("You don't have the necessary rights to unban users in this group.")
         return
     unban_user(user_id)
@@ -119,7 +119,7 @@ def get_ban_keyboard(user_id, username):
 async def unban_callback(_, query):
     user_id = int(query.matches[0].group(1))
     username = query.matches[0].group(2)
-    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "creator"):
+    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "owner"):
         await query.answer("You're not an admin, you don't have the right to unban.", show_alert=True)
         return
     unban_user(user_id)
@@ -132,7 +132,7 @@ async def unban_callback(_, query):
 async def ban_callback(_, query):
     user_id = int(query.matches[0].group(1))
     username = query.matches[0].group(2)
-    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "creator"):
+    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "owner"):
         await query.answer("You're not an admin, you don't have the right to ban.", show_alert=True)
         return
     ban_user(user_id, username, "")
