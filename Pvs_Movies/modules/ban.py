@@ -6,6 +6,14 @@ from pyrogram.types import (
 from Pvs_Movies.database.ban_sql import ban_user, unban_user
 from Pvs_Movies import app
 
+async def is_admin(chat_id, user_id):
+    try:
+        member = await app.get_chat_member(chat_id, user_id)
+        return member.status in ("administrator", "creator")
+    except Exception as e:
+        print(f"Error getting chat member: {e}")
+        return False
+
 @app.on_message(filters.command("ban") & filters.group)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
@@ -24,7 +32,7 @@ async def ban_command(_, message):
     if not member.privileges or not member.privileges.can_restrict_members:
         await message.reply_text("I don't have the necessary rights to ban users in this group.")
         return
-    if (await app.get_chat_member(message.chat.id, message.from_user.id)).status not in ("administrator", "creator"):
+    if not await is_admin(message.chat.id, message.from_user.id):
         await message.reply_text("You must be an admin or the group owner to use this command.")
         return
     app_id = await app.get_me().id
@@ -56,7 +64,7 @@ async def unban_command(_, message):
     if not member.privileges or not member.privileges.can_restrict_members:
         await message.reply_text("I don't have the necessary rights to unban users in this group.")
         return
-    if (await app.get_chat_member(message.chat.id, message.from_user.id)).status not in ("administrator", "creator"):
+    if not await is_admin(message.chat.id, message.from_user.id):
         await message.reply_text("You must be an admin or the group owner to use this command.")
         return
     unban_user(user_id)
@@ -65,7 +73,7 @@ async def unban_command(_, message):
         f"User {user_id} ({username}) has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
     )
-
+    
 def get_user_info(message):
     user_id = None
     username = None
