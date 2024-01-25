@@ -27,8 +27,8 @@ async def admin_check(client, message: Message) -> bool:
         return False
 
     if check_status.status not in [
-        ChatMemberStatus.OWNER,
-        ChatMemberStatus.ADMINISTRATOR
+        "administrator",
+        "creator"
     ]:
         return False
     else:
