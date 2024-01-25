@@ -3,15 +3,11 @@ from pyrogram.types import InlineKeyboardButton as Button, InlineKeyboardMarkup 
 from Pvs_Movies.database.ban_sql import ban_user, unban_user
 from Pvs_Movies import app
 
-async def has_ban_rights(chat_id):
-    me = await app.get_me()
-    chat_member = await app.get_chat_member(chat_id, me.id)
-    return chat_member.can_restrict_members
-
 @app.on_message(filters.command("ban") & filters.group)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
-    if not await has_ban_rights(message.chat.id):
+    a = await app.get_chat_member(chat_id, aing.id)
+    if not a.can_restrict_member:
         await message.reply_text("I don't have the necessary rights to ban users in this group.")
         return
     if not user_id:
@@ -36,8 +32,9 @@ async def ban_command(_, message):
 @app.on_message(filters.command("unban") & filters.group)
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
-    if not await has_ban_rights(message.chat.id):
-        await message.reply_text("I don't have the necessary rights to unban users in this group.")
+    a = await app.get_chat_member(chat_id, aing.id)
+    if not a.can_restrict_member:
+        await message.reply_text("I don't have the necessary rights to ban users in this group.")
         return
     if not user_id:
         await message.reply_text("Please provide a user ID, username, or reply to a user to unban.")
