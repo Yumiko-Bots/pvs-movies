@@ -5,16 +5,33 @@ from pyrogram.types import (
 )
 from Pvs_Movies.database.ban_sql import ban_user, unban_user
 from Pvs_Movies import app
+from pyrogram.types import Message
+from pyrogram.enums import ChatType, ChatMemberStatus
 
-async def is_admin(chat_id, user_id):
-    try:
-        member = await app.get_chat_member(chat_id, user_id)
-        return member.status in ("administrator", "creator")
-    except Exception as e:
-        print(f"Error getting chat member: {e}")
+
+async def admin_check(message: Message) -> bool:
+    if not message.from_user:
         return False
+    if message.chat.type not in [ChatType.SUPERGROUP, ChatType.CHANNEL]:
+        return False
+    if message.from_user.id in [
+        777000,  # Telegram Service Notifications
+        1087968824,  # GroupAnonymousBot
+    ]:
+        return True
+    client = message._client
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+    check_status = await client.get_chat_member(chat_id=chat_id, user_id=user_id)
+    if check_status.status not in [
+        ChatMemberStatus.OWNER,
+        ChatMemberStatus.ADMINISTRATOR
+    ]:
+        return False
+    else:
+        return True
 
-@app.on_message(filters.command("ban") & filters.group)
+@app.on_message(filters.command("ban") & filters.group & admin_check)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
     if user_id is None:
@@ -29,11 +46,8 @@ async def ban_command(_, message):
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    if not member.privileges or not member.privileges.can_restrict_members:
+    if not member.privileges.can_restrict_members:
         await message.reply_text("I don't have the necessary rights to ban users in this group.")
-        return
-    if not await is_admin(message.chat.id, message.from_user.id):
-        await message.reply_text("You must be an admin or the group owner to use this command.")
         return
     app_id = await app.get_me().id
     if user_id == app_id:
@@ -46,7 +60,7 @@ async def ban_command(_, message):
         reply_markup=get_unban_keyboard(user_id, username)
     )
 
-@app.on_message(filters.command("unban") & filters.group)
+@app.on_message(filters.command("unban") & filters.group & admin_check)
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
     if user_id is None:
@@ -61,11 +75,8 @@ async def unban_command(_, message):
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    if not member.privileges or not member.privileges.can_restrict_members:
+    if not member.privileges.can_restrict_members:
         await message.reply_text("I don't have the necessary rights to unban users in this group.")
-        return
-    if not await is_admin(message.chat.id, message.from_user.id):
-        await message.reply_text("You must be an admin or the group owner to use this command.")
         return
     unban_user(user_id)
     await app.unban_chat_member(message.chat.id, user_id)
