@@ -11,6 +11,9 @@ async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
     perms = []
     member = (await app.get_chat_member(message.chat.id, user_id)).privileges
+    if member is None:
+        await message.reply_text("User not found in the chat.")
+        return
     if not member:
         return []
     if member.can_restrict_members:
@@ -42,6 +45,9 @@ async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
     perms = []
     member = (await app.get_chat_member(message.chat.id, user_id)).privileges
+    if member is None:
+        await message.reply_text("User not found in the chat.")
+        return
     if not member:
         return []
     if member.can_restrict_members:
