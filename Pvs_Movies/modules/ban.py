@@ -3,24 +3,29 @@ from pyrogram.types import InlineKeyboardButton as Button, InlineKeyboardMarkup 
 from Pvs_Movies.database.ban_sql import ban_user, unban_user
 from Pvs_Movies import app
 
-async def is_admin(chat_id, user_id):
-    member = await app.get_chat_member(chat_id, user_id)
-    return member.status in ("administrator", "creator")
+async def has_ban_rights(chat_id):
+    me = await app.get_me()
+    chat_member = await app.get_chat_member(chat_id, me.id)
+    return chat_member.can_restrict_members
 
 @app.on_message(filters.command("ban") & filters.group)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
-
-    if not await is_admin(message.chat.id, message.from_user.id):
-        await message.reply_text("You must be an admin or the group owner to use this command.")
+    if not await has_ban_rights(message.chat.id):
+        await message.reply_text("I don't have the necessary rights to ban users in this group.")
         return
     if not user_id:
         await message.reply_text("Please provide a user ID or username or reply to a user to ban.")
         return
+    if not (await app.get_chat_member(message.chat.id, message.from_user.id)).status in ("administrator", "creator"):
+        await message.reply_text("You must be an admin or the group owner to use this command.")
+        return
+
     app_id = await app.get_me().id
     if user_id == app_id:
         await message.reply_text("You cannot ban the bot owner.")
         return
+
     await app.ban_chat_member(message.chat.id, user_id)
     ban_user(user_id, username, reason)
     await message.reply_text(
@@ -31,18 +36,17 @@ async def ban_command(_, message):
 @app.on_message(filters.command("unban") & filters.group)
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
-
-    if not await is_admin(message.chat.id, message.from_user.id):
-        await message.reply_text("You must be an admin or the group owner to use this command.")
+    if not await has_ban_rights(message.chat.id):
+        await message.reply_text("I don't have the necessary rights to unban users in this group.")
         return
-
     if not user_id:
         await message.reply_text("Please provide a user ID, username, or reply to a user to unban.")
         return
-
+    if not (await app.get_chat_member(message.chat.id, message.from_user.id)).status in ("administrator", "creator"):
+        await message.reply_text("You must be an admin or the group owner to use this command.")
+        return
     unban_user(user_id)
     await app.unban_chat_member(message.chat.id, user_id)
-
     await message.reply_text(
         f"User {user_id} ({username}) has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
@@ -81,8 +85,11 @@ def get_ban_keyboard(user_id, username):
 @app.on_callback_query(filters.regex(r"unban_(\d+)_(\w+)"))
 async def unban_callback(_, query):
     user_id = int(query.matches[0].group(1))
-    username = query.matches[0].group(2)  
-    unban_user(user_id)   
+    username = query.matches[0].group(2)
+    if not (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status in ("administrator", "creator"):
+        await query.answer("You're not an admin, you don't have the right to unban.", show_alert=True)
+        return
+    unban_user(user_id)
     await query.message.edit_text(
         f"User {user_id} ({username}) has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
@@ -91,8 +98,11 @@ async def unban_callback(_, query):
 @app.on_callback_query(filters.regex(r"ban_(\d+)_(\w+)"))
 async def ban_callback(_, query):
     user_id = int(query.matches[0].group(1))
-    username = query.matches[0].group(2)  
-    ban_user(user_id, username, "")  
+    username = query.matches[0].group(2)
+    if not (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status in ("administrator", "creator"):
+        await query.answer("You're not an admin, you don't have the right to ban.", show_alert=True)
+        return
+    ban_user(user_id, username, "")
     await query.message.edit_text(
         f"User {user_id} ({username}) has been banned.",
         reply_markup=get_unban_keyboard(user_id, username)
