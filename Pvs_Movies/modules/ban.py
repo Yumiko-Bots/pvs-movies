@@ -34,7 +34,7 @@ async def admin_check(client, message: Message) -> bool:
     else:
         return True
 
-async def admin_filter_f(_, client, message):
+async def admin_filter_f(client, message):
     return (
         not message.edit_date
         and await admin_check(client, message)
