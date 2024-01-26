@@ -57,12 +57,9 @@ async def ban_command(_, message):
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    if member.status not in ["administrator", "creator"]:
-        await message.reply_text("You don't have the necessary rights to ban users in this group.")
-        return
     app_id = await app.get_me().id
     if user_id == app_id:
-        await message.reply_text("You cannot ban the bot owner.")
+        await message.reply_text("You cannot ban the bot")
         return
     await message.chat.ban_member(message.chat.id, user_id)
     ban_user(user_id, username, reason)
@@ -85,9 +82,6 @@ async def unban_command(_, message):
         return
     if member is None:
         await message.reply_text("User not found in the chat.")
-        return
-    if member.status not in ["administrator", "creator"]:
-        await message.reply_text("You don't have the necessary rights to unban users in this group.")
         return
     unban_user(user_id)
     await message.chat.unban_member(message.chat.id, user_id)
