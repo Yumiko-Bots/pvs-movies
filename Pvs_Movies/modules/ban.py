@@ -18,7 +18,7 @@ async def is_admin(chat_id, user_id):
         print(f"Error getting chat member: {e}")
         return False
 
-@app.on_message(filters.command("ban") & filters.group & filters.user(app.me.id))
+@app.on_message(filters.command("ban") & filters.group)
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
     if user_id is None:
@@ -47,7 +47,7 @@ async def ban_command(_, message):
         reply_markup=get_unban_keyboard(user_id, username)
     )
 
-@app.on_message(filters.command("unban") & filters.group & filters.user(app.me.id))
+@app.on_message(filters.command("unban") & filters.group)
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
     if user_id is None:
