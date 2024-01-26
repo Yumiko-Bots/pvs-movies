@@ -42,8 +42,12 @@ async def ban_command(_, message):
         return
     await app.ban_chat_member(message.chat.id, user_id)
     ban_user(user_id, username, reason)
+    reply_text = (
+        f"**Banned:** User @{username} has been banned."
+        f"\n**Reason:** <code>{reason}</code>" if reason else f"User @{username} has been banned."
+    )
     await message.reply_text(
-        f"User {user_id} ({username}) has been banned.\nReason: {reason}",
+        reply_text,
         reply_markup=get_unban_keyboard(user_id, username)
     )
 
@@ -68,7 +72,7 @@ async def unban_command(_, message):
     unban_user(user_id)
     await app.chat.unban_chat_member(message.chat.id, user_id)
     await message.reply_text(
-        f"User {user_id} ({username}) has been unbanned.",
+        f"User @{username} has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
     )
     
@@ -76,7 +80,6 @@ def get_user_info(message):
     user_id = None
     username = None
     reason = None
-
     if message.reply_to_message:
         user_id = message.reply_to_message.from_user.id
         username = message.reply_to_message.from_user.username
@@ -93,7 +96,6 @@ def get_user_info(message):
                     pass
         if len(args) > 1:
             reason = " ".join(args[1:])
-
     return user_id, username, reason
 
 def get_unban_keyboard(user_id, username):
