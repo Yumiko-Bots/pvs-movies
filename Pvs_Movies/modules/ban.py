@@ -6,16 +6,16 @@ from pyrogram.types import (
 from Pvs_Movies.database.ban_sql import ban_user, unban_user
 from Pvs_Movies import app
 from pyrogram.types import Message
-from pyrogram.enums import ChatType, ChatMemberStatus
+from pyrogram.enums import ChatMemberStatus
 from time import time
 import asyncio
 
 async def is_admin(chat_id, user_id):
     try:
-        member = await app.get_chat_member(chat_id, user_id)
-        return member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
+        chat_info = await app.get_chat(chat_id)
+        return chat_info.type in [ChatType.GROUP, ChatType.SUPERGROUP] and await app.get_chat_member(chat_id, user_id).status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
     except Exception as e:
-        print(f"Error getting chat member: {e}")
+        print(f"Error getting chat information: {e}")
         return False
 
 @app.on_message(filters.command("ban") & filters.group)
@@ -37,7 +37,7 @@ async def ban_command(_, message):
         await message.reply_text("User not found in the chat.")
         return
     app_id = await app.get_me()
-    if user_id == app_id:
+    if user_id == app_id.id:
         await message.reply_text("You cannot ban the bot")
         return
     await app.ban_chat_member(message.chat.id, user_id)
@@ -71,7 +71,6 @@ async def unban_command(_, message):
         f"User {user_id} ({username}) has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
     )
-
     
 def get_user_info(message):
     user_id = None
