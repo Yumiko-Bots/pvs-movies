@@ -57,7 +57,7 @@ async def ban_command(_, message):
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    app_id = await app.get_me().id
+    app_id = app.get_me().id
     if user_id == app_id:
         await message.reply_text("You cannot ban the bot")
         return
