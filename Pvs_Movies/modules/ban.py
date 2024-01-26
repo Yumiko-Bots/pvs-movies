@@ -7,6 +7,8 @@ from Pvs_Movies.database.ban_sql import ban_user, unban_user
 from Pvs_Movies import app
 from pyrogram.types import Message
 from pyrogram.enums import ChatType, ChatMemberStatus
+from time import time
+import asyncio
 
 async def admin_check(client, message: Message) -> bool:
     if not message.from_user:
@@ -57,11 +59,11 @@ async def ban_command(_, message):
     if member is None:
         await message.reply_text("User not found in the chat.")
         return
-    app_id = app.get_me()
+    app_id = await app.get_me()
     if user_id == app_id:
         await message.reply_text("You cannot ban the bot")
         return
-    await message.chat.ban_member(message.chat.id, user_id)
+    await message.ban_chat_member(message.chat.id, user_id)
     ban_user(user_id, username, reason)
     await message.reply_text(
         f"User {user_id} ({username}) has been banned.\nReason: {reason}",
@@ -84,7 +86,7 @@ async def unban_command(_, message):
         await message.reply_text("User not found in the chat.")
         return
     unban_user(user_id)
-    await message.chat.unban_member(message.chat.id, user_id)
+    await message.chat.unban_chat_member(message.chat.id, user_id)
     await message.reply_text(
         f"User {user_id} ({username}) has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
