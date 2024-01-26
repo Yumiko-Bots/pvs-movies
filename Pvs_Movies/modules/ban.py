@@ -63,7 +63,7 @@ async def ban_command(_, message):
     if user_id == app_id:
         await message.reply_text("You cannot ban the bot")
         return
-    await message.ban_chat_member(message.chat.id, user_id)
+    await app.ban_chat_member(message.chat.id, user_id)
     ban_user(user_id, username, reason)
     await message.reply_text(
         f"User {user_id} ({username}) has been banned.\nReason: {reason}",
@@ -86,7 +86,7 @@ async def unban_command(_, message):
         await message.reply_text("User not found in the chat.")
         return
     unban_user(user_id)
-    await message.chat.unban_chat_member(message.chat.id, user_id)
+    await app.chat.unban_chat_member(message.chat.id, user_id)
     await message.reply_text(
         f"User {user_id} ({username}) has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
