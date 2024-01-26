@@ -10,45 +10,22 @@ from pyrogram.enums import ChatType, ChatMemberStatus
 from time import time
 import asyncio
 
-async def admin_check(client, message: Message) -> bool:
-    if not message.from_user:
-        return False
-    if message.chat.type not in [ChatType.SUPERGROUP, ChatType.CHANNEL]:
-        return False
-    if message.from_user.id in [
-        777000,  # Telegram Service Notifications
-        1087968824,  # GroupAnonymousBot
-    ]:
-        return True
-    chat_id = message.chat.id
-    user_id = message.from_user.id
+async def is_admin(chat_id, user_id):
     try:
-        check_status = await client.get_chat_member(chat_id=chat_id, user_id=user_id)
+        member = await app.get_chat_member(chat_id, user_id)
+        return member.status in [ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.CREATOR]
     except Exception as e:
         print(f"Error getting chat member: {e}")
         return False
 
-    if check_status.status not in [
-        "administrator",
-        "creator"
-    ]:
-        return False
-    else:
-        return True
-
-async def admin_filter_f(_, client, message):
-    return (
-        not message.edit_date
-        and await admin_check(client, message)
-    )
-    
-admin_filter = filters.create(func=admin_filter_f, name="AdminFilter")
-
-@app.on_message(filters.command("ban") & filters.group)
+@app.on_message(filters.command("ban") & filters.group & filters.user(app.me.id))
 async def ban_command(_, message):
     user_id, username, reason = get_user_info(message)
     if user_id is None:
         await message.reply_text("Please provide a valid user ID, username, or reply to a user to ban.")
+        return
+    if not await is_admin(message.chat.id, message.from_user.id):
+        await message.reply_text("You must be an admin to use this command.")
         return
     try:
         member = await app.get_chat_member(message.chat.id, user_id)
@@ -70,11 +47,14 @@ async def ban_command(_, message):
         reply_markup=get_unban_keyboard(user_id, username)
     )
 
-@app.on_message(filters.command("unban") & filters.group)
+@app.on_message(filters.command("unban") & filters.group & filters.user(app.me.id))
 async def unban_command(_, message):
     user_id, username, _ = get_user_info(message)
     if user_id is None:
         await message.reply_text("Please provide a valid user ID, username, or reply to a user to unban.")
+        return
+    if not await is_admin(message.chat.id, message.from_user.id):
+        await message.reply_text("You must be an admin to use this command.")
         return
     try:
         member = await app.get_chat_member(message.chat.id, user_id)
@@ -91,6 +71,7 @@ async def unban_command(_, message):
         f"User {user_id} ({username}) has been unbanned.",
         reply_markup=get_ban_keyboard(user_id, username)
     )
+
     
 def get_user_info(message):
     user_id = None
@@ -126,9 +107,6 @@ def get_ban_keyboard(user_id, username):
 async def unban_callback(_, query):
     user_id = int(query.matches[0].group(1))
     username = query.matches[0].group(2)
-    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "owner"):
-        await query.answer("You're not an admin, you don't have the right to unban.", show_alert=True)
-        return
     unban_user(user_id)
     await query.message.edit_text(
         f"User {user_id} ({username}) has been unbanned.",
@@ -139,9 +117,6 @@ async def unban_callback(_, query):
 async def ban_callback(_, query):
     user_id = int(query.matches[0].group(1))
     username = query.matches[0].group(2)
-    if (await app.get_chat_member(query.message.chat.id, query.from_user.id)).status not in ("administrator", "owner"):
-        await query.answer("You're not an admin, you don't have the right to ban.", show_alert=True)
-        return
     ban_user(user_id, username, "")
     await query.message.edit_text(
         f"User {user_id} ({username}) has been banned.",
